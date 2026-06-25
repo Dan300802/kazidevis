@@ -9,14 +9,11 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: "black-translucent",
     title: "KaziDevis",
-    startupImage: "/icon-512.png",
   },
   icons: {
-    icon:  [{ url: "/icon-192.png", sizes: "192x192" }, { url: "/icon-512.png", sizes: "512x512" }],
+    icon:  [{ url: "/icon-192.png" }],
     apple: [{ url: "/icon-192.png" }],
   },
-  keywords: ["devis", "artisan", "togo", "finances", "facture", "kazi"],
-  authors: [{ name: "KaziDevis" }],
 };
 
 export const viewport: Viewport = {
@@ -25,19 +22,21 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   themeColor: "#16A34A",
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr">
       <head>
-        <link rel="apple-touch-icon" href="/icon-192.png" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="KaziDevis" />
+        <meta name="format-detection" content="telephone=no" />
+        <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
-      <body className="bg-white min-h-dvh">{children}</body>
+      <body>{children}</body>
     </html>
   );
 }

@@ -16,10 +16,25 @@ import { ProfilScreen }   from "@/components/screens/ProfilScreen";
 type AppState = "splash" | "auth" | "app";
 
 export default function App() {
-  const [state, setState] = useState<AppState>("splash");
-  const [user,  setUser]  = useState<UserAuth | null>(null);
-  const activeTab = useAppStore((s) => s.activeTab);
+  const [state,    setState]   = useState<AppState>("splash");
+  const [user,     setUser]    = useState<UserAuth | null>(null);
+  const [hydrated, setHydrated] = useState(false);
+
+  const activeTab     = useAppStore((s) => s.activeTab);
   const updateArtisan = useAppStore((s) => s.updateArtisan);
+
+  // ── Attendre l'hydratation Zustand (critique sur mobile) ──
+  useEffect(() => {
+    // Zustand persist a besoin d'un tick pour lire localStorage
+    const unsub = useAppStore.persist.onFinishHydration(() => {
+      setHydrated(true);
+    });
+    // Si déjà hydraté (PC rapide)
+    if (useAppStore.persist.hasHydrated()) {
+      setHydrated(true);
+    }
+    return () => unsub();
+  }, []);
 
   const handleAuth = (u: UserAuth) => {
     saveUser(u);
@@ -34,18 +49,48 @@ export default function App() {
     setState("app");
   };
 
+  const handleSplashDone = () => {
+    if (!hydrated) {
+      // Attendre hydratation si pas encore prête
+      const check = setInterval(() => {
+        if (useAppStore.persist.hasHydrated()) {
+          clearInterval(check);
+          doAfterHydration();
+        }
+      }, 50);
+      setTimeout(() => { clearInterval(check); doAfterHydration(); }, 2000);
+    } else {
+      doAfterHydration();
+    }
+  };
+
+  const doAfterHydration = () => {
+    try {
+      const existing = getUser();
+      if (existing) {
+        setUser(existing);
+        updateArtisan({
+          nom:       existing.nom,
+          metier:    existing.metier,
+          telephone: existing.telephone,
+          ville:     existing.ville || "Togo",
+          initiales: existing.initiales,
+        });
+        setState("app");
+      } else {
+        setState("auth");
+      }
+    } catch {
+      setState("auth");
+    }
+  };
+
   return (
-    <div className="min-h-dvh bg-gray-100 flex items-start justify-center">
-      <div className="relative w-full bg-white overflow-hidden" style={{ maxWidth: 430, minHeight: "100dvh" }}>
+    <div style={{ minHeight: "100dvh", background: "#F1F5F9", display: "flex", alignItems: "flex-start", justifyContent: "center" }}>
+      <div style={{ position: "relative", width: "100%", maxWidth: 430, minHeight: "100dvh", background: "#fff", overflow: "hidden" }}>
 
         {/* SPLASH */}
-        {state === "splash" && (
-          <SplashScreen onDone={() => {
-            const existing = getUser();
-            if (existing) { setUser(existing); updateArtisan({ nom: existing.nom, metier: existing.metier, telephone: existing.telephone, ville: existing.ville || "Togo", initiales: existing.initiales }); setState("app"); }
-            else setState("auth");
-          }} />
-        )}
+        {state === "splash" && <SplashScreen onDone={handleSplashDone} />}
 
         {/* AUTH */}
         {state === "auth" && <AuthScreen onAuth={handleAuth} />}
@@ -53,13 +98,18 @@ export default function App() {
         {/* APP */}
         {state === "app" && (
           <>
-            <div className="overflow-y-auto" style={{ minHeight: "100dvh" }}>
+            <div style={{ minHeight: "100dvh", overflowY: "auto" }}>
               {activeTab === "home"     && <HomeScreen />}
               {activeTab === "devis"    && <DevisScreen />}
               {activeTab === "clients"  && <ClientsScreen />}
               {activeTab === "rapport"  && <RapportScreen />}
               {activeTab === "finances" && <FinancesScreen />}
-              {activeTab === "profil"   && <ProfilScreen onLogout={() => { localStorage.removeItem("kazidevis_auth"); setState("auth"); }} />}
+              {activeTab === "profil"   && (
+                <ProfilScreen onLogout={() => {
+                  try { localStorage.removeItem("kazidevis_auth"); } catch {}
+                  setState("auth");
+                }} />
+              )}
             </div>
             <BottomNav />
           </>
