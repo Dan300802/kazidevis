@@ -10,19 +10,34 @@ export interface UserAuth {
   createdAt: string;
 }
 
+// Storage sécurisé — fonctionne sur iOS Safari, mode privé, etc.
+function safeGet(key: string): string | null {
+  try { return localStorage.getItem(key); } catch { return null; }
+}
+function safeSet(key: string, val: string): void {
+  try { localStorage.setItem(key, val); } catch {}
+}
+function safeRemove(key: string): void {
+  try { localStorage.removeItem(key); } catch {}
+}
+
 const KEY = "kazidevis_auth";
 
 export function getUser(): UserAuth | null {
-  if (typeof window === "undefined") return null;
-  try { return JSON.parse(localStorage.getItem(KEY) || "null"); } catch { return null; }
+  try {
+    const raw = safeGet(KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch { return null; }
 }
 
 export function saveUser(u: UserAuth) {
-  localStorage.setItem(KEY, JSON.stringify(u));
+  safeSet(KEY, JSON.stringify(u));
+  safeSet(`kazidevis_user_${u.telephone.replace(/\s/g,"")}`, JSON.stringify(u));
 }
 
 export function logout() {
-  localStorage.removeItem(KEY);
+  safeRemove(KEY);
 }
 
 export function genId(): string {
