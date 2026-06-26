@@ -6,6 +6,17 @@ import { AppShell }     from "./AppShell";
 
 type AppState = "splash" | "auth" | "app";
 
+// Vérifie si un user est connecté via le token stocké
+function getSavedUid(): string | null {
+  try {
+    const keys = Object.keys(localStorage);
+    const fbKey = keys.find(k => k.includes("firebase:authUser"));
+    if (!fbKey) return null;
+    const data = JSON.parse(localStorage.getItem(fbKey) || "null");
+    return data?.uid || null;
+  } catch { return null; }
+}
+
 export default function App() {
   const [state, setState] = useState<AppState>("splash");
   const [uid,   setUid]   = useState<string | null>(null);
@@ -13,37 +24,28 @@ export default function App() {
   useEffect(() => {
     let done = false;
 
-    const goAuth = () => {
-      if (done) return;
-      done = true;
-      setState("auth");
-    };
+    const goAuth = () => { if (!done) { done = true; setState("auth"); } };
+    const goApp  = (id: string) => { if (!done) { done = true; setUid(id); setState("app"); } };
 
-    const goApp = (id: string) => {
-      if (done) return;
-      done = true;
-      setUid(id);
-      setState("app");
-    };
+    // 1. Vérifier d'abord localStorage (instantané, marche sur iOS)
+    const savedUid = getSavedUid();
+    if (savedUid) {
+      goApp(savedUid);
+      return;
+    }
 
-    // Timeout de secours — 4 secondes max, puis on affiche login
-    const fallback = setTimeout(goAuth, 4000);
+    // 2. Timeout de 3s si pas de session sauvegardée
+    const fallback = setTimeout(goAuth, 3000);
 
-    // Firebase Auth
-    import("firebase/auth").then(({ getAuth, onAuthStateChanged }) => {
-      import("@/lib/firebase").then(({ default: app }) => {
-        const auth = getAuth(app);
-        const unsub = onAuthStateChanged(auth, (user) => {
-          clearTimeout(fallback);
-          if (user) goApp(user.uid);
-          else goAuth();
-          unsub();
-        }, () => {
-          clearTimeout(fallback);
-          goAuth();
-        });
-      }).catch(() => { clearTimeout(fallback); goAuth(); });
-    }).catch(() => { clearTimeout(fallback); goAuth(); });
+    // 3. Essayer Firebase Auth en arrière-plan
+    try {
+      const { auth } = require("@/lib/firebase");
+      const { onAuthStateChanged } = require("firebase/auth");
+      const unsub = onAuthStateChanged(auth,
+        (user: any) => { clearTimeout(fallback); if (user) goApp(user.uid); else goAuth(); unsub(); },
+        () => { clearTimeout(fallback); goAuth(); }
+      );
+    } catch { clearTimeout(fallback); goAuth(); }
 
     return () => clearTimeout(fallback);
   }, []);
