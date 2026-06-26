@@ -368,6 +368,7 @@ function GestionAcomptes({ devis, onBack, onUpdate }: { devis: Devis; onBack: ()
 }
 
 function NouveauDevis({ onBack, onSave, totalDevis: count }: { onBack: () => void; onSave: (d: Devis) => void; totalDevis: number }) {
+  const [titre,  setTitre]  = useState("");
   const [client, setClient] = useState("");
   const [tel, setTel]       = useState("");
   const [metier, setMetier] = useState(METIERS[0]);
@@ -390,7 +391,7 @@ function NouveauDevis({ onBack, onSave, totalDevis: count }: { onBack: () => voi
     if (lignes.some((l) => !l.description.trim())) errs.lignes = "Toutes les lignes doivent avoir une description";
     setErrors(errs);
     if (Object.keys(errs).length) return;
-    onSave({ id: genId(), numero: genNumeroDevis(count), client: client.trim(), telephone: tel, typeMetier: metier, statut: "envoye", lignes, dateCreation: new Date().toISOString().slice(0, 10), notes });
+    onSave({ id: genId(), numero: genNumeroDevis(count), titre: titre.trim()||undefined, client: client.trim(), telephone: tel, typeMetier: metier, statut: "envoye", lignes, dateCreation: new Date().toISOString().slice(0, 10), notes });
   };
 
   return (

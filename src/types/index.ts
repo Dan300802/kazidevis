@@ -27,6 +27,7 @@ export interface Devis {
   acomptes?: Acompte[];
   dateCreation: string;
   dateValidite?: string;
+  titre?: string;
   notes?: string;
 }
 
@@ -65,6 +66,7 @@ export interface Client {
   adresse?: string;
   ville?: string;
   metier?: string;         // type de travaux fréquent
+  titre?: string;
   notes?: string;
   dateCreation: string;
   initiales: string;

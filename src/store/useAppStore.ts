@@ -73,6 +73,10 @@ export const useAppStore = create<AppState>()(
         set({ abonnement: { plan: "premium", dateDebut: now.toISOString().slice(0,10), dateExpiration: exp.toISOString().slice(0,10), referenceTransaction: ref, telephone } });
       },
       estPremium: () => {
+        // Admin bypass
+        try { const u = JSON.parse(localStorage.getItem("kazidevis_auth") || "null"); if (u?.email && ["danielvodjogbe@gmail.com"].includes(u.email)) return true; } catch {}
+        // Firebase user check
+        try { const keys = Object.keys(localStorage); const fk = keys.find(k => k.includes("firebase:authUser")); if (fk) { const d = JSON.parse(localStorage.getItem(fk)||"null"); if (d?.email && ["danielvodjogbe@gmail.com"].includes(d.email)) return true; } } catch {}
         const { abonnement } = get();
         if (abonnement.plan !== "premium" || !abonnement.dateExpiration) return false;
         return new Date(abonnement.dateExpiration) > new Date();
@@ -81,3 +85,6 @@ export const useAppStore = create<AppState>()(
     { name: "artisan-app-v1" }
   )
 );
+
+// Emails admin avec accès Premium gratuit
+export const ADMIN_EMAILS = ["danielvodjogbe@gmail.com"];
