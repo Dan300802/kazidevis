@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Eye, EyeOff, ArrowLeft, Check } from "lucide-react";
-import { KaziLogo } from "./SplashScreen";
+
 import { inscrire, connecter } from "@/lib/firebaseAuth";
 import { getInitiales } from "@/lib/auth";
 import { genCouleur } from "@/lib/clients";
@@ -72,7 +72,7 @@ function LoginView({ onRegister, onAuth }: { onRegister:()=>void; onAuth:(u:any)
     <div style={{ minHeight:"100dvh", display:"flex", flexDirection:"column" }}>
       <div style={{ background:"linear-gradient(135deg,#14532D,#16A34A)", padding:"40px 24px 32px", display:"flex", flexDirection:"column", alignItems:"center", gap:14 }}>
         <div style={{ width:72, height:72, borderRadius:20, background:"rgba(255,255,255,0.12)", border:"1.5px solid rgba(255,255,255,0.2)", display:"flex", alignItems:"center", justifyContent:"center" }}>
-          <KaziLogo size={44} />
+          <img src="/logo.png" alt="KaziDevis" style={{ width:44, height:44, objectFit:"contain" }} />
         </div>
         <div style={{ textAlign:"center" }}>
           <div style={{ display:"flex", alignItems:"baseline", gap:2, justifyContent:"center" }}>
