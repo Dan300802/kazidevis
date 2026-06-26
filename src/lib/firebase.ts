@@ -1,4 +1,4 @@
-import { initializeApp, getApps } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
@@ -11,7 +11,7 @@ const firebaseConfig = {
   appId:             "1:1038692158393:web:36b866413a01544f73c468",
 };
 
-// Évite la double initialisation en dev (Next.js hot reload)
-const app  = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+const app  = getApps().length ? getApp() : initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db   = getFirestore(app);
+export default app;
