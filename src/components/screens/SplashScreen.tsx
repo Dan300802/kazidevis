@@ -59,9 +59,9 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
 
       {/* Logo */}
       <div style={{ display:"flex", flexDirection:"column", alignItems:"center" }}>
-        <div style={{ width:110, height:110, borderRadius:32, background:"rgba(255,255,255,0.12)", border:"1.5px solid rgba(255,255,255,0.2)", display:"flex", alignItems:"center", justifyContent:"center", marginBottom:22 }}>
-          <KaziLogo size={72} />
-        </div>
+        <div style={{ width:110, height:110, borderRadius:32, overflow:"hidden", marginBottom:22 }}>
+  <img src="/logo.png" alt="KaziDevis" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
+</div>
         <div style={{ display:"flex", alignItems:"baseline", gap:2 }}>
           <span style={{ fontSize:42, fontWeight:800, color:"#fff", fontFamily:"'Plus Jakarta Sans',sans-serif", letterSpacing:-1.5 }}>Kazi</span>
           <span style={{ fontSize:42, fontWeight:800, color:"#FBBF24", fontFamily:"'Plus Jakarta Sans',sans-serif", letterSpacing:-1.5 }}>Devis</span>
