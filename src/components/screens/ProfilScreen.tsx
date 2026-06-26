@@ -48,7 +48,7 @@ function AbonnementCard() {
   );
 }
 
-export function ProfilScreen({ onLogout }: { onLogout?: () => void }) {
+export function ProfilScreen({ onLogout, uid }: { onLogout?: () => void; uid?: string }) {
   const { artisan, updateArtisan, devis, transactions } = useAppStore();
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({ ...artisan });

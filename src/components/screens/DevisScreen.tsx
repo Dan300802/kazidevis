@@ -23,7 +23,7 @@ const card: React.CSSProperties = {
 
 type View = "list" | "detail" | "nouveau" | "acomptes";
 
-export function DevisScreen() {
+export function DevisScreen({ uid }: { uid?: string }) {
   const [view, setView]         = useState<View>("list");
   const [selected, setSelected] = useState<Devis | null>(null);
   const [search, setSearch]     = useState("");

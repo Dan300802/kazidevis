@@ -26,7 +26,7 @@ function Avatar({ client, size = 44 }: { client: Client; size?: number }) {
   );
 }
 
-export function ClientsScreen() {
+export function ClientsScreen({ uid }: { uid?: string }) {
   const [view, setView]         = useState<View>("list");
   const [selected, setSelected] = useState<Client | null>(null);
   const [search, setSearch]     = useState("");

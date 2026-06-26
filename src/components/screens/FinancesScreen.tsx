@@ -5,7 +5,7 @@ import { useAppStore } from "@/store/useAppStore";
 import { formatMontant, formatDate, CATEGORIES_DEPENSE, CATEGORIES_REVENU, genId } from "@/lib/utils";
 import type { Transaction } from "@/types";
 
-export function FinancesScreen() {
+export function FinancesScreen({ uid }: { uid?: string }) {
   const [showForm, setShowForm] = useState(false);
   const { transactions, addTransaction, deleteTransaction } = useAppStore();
 
