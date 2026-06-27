@@ -1,6 +1,6 @@
 "use client";
-import { useState } from "react";
-import { Phone, MapPin, Wrench, Edit2, Check, X, Crown, Star } from "lucide-react";
+import { useState, useRef } from "react";
+import { Phone, MapPin, Wrench, Edit2, Check, X, Crown, Star, Camera } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 import { METIERS, formatDate } from "@/lib/utils";
 import { PremiumScreen } from "@/components/screens/PremiumScreen";
@@ -17,14 +17,14 @@ function AbonnementCard() {
   const premium = estPremium();
   return (
     <>
-      <div style={{ borderRadius:12, overflow:"hidden", boxShadow:"0 1px 2px rgba(0,0,0,0.04),0 3px 8px rgba(0,0,0,0.05)" }}>
+      <div style={{ borderRadius:12, overflow:"hidden", ...card }}>
         <div style={{ background:premium?"linear-gradient(135deg,#D97706,#F59E0B)":"linear-gradient(135deg,#475569,#334155)", padding:"12px 14px" }}>
           <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:4 }}>
             <Crown size={16} style={{ color:"#fff" }}/>
             <p style={{ fontSize:13, fontWeight:800, color:"#fff" }}>{premium?"Premium actif":"Plan Gratuit"}</p>
           </div>
           <p style={{ fontSize:11, color:"rgba(255,255,255,0.7)" }}>
-            {premium ? `Expire le ${abonnement.dateExpiration ? formatDate(abonnement.dateExpiration) : "—"}` : "Export PDF et WhatsApp non disponibles"}
+            {premium?`Expire le ${abonnement.dateExpiration ? formatDate(abonnement.dateExpiration) : "—"}`:"Export PDF et WhatsApp non disponibles"}
           </p>
         </div>
         <div style={{ background:"#fff", padding:"10px 14px" }}>
@@ -48,6 +48,8 @@ export function ProfilScreen({ onLogout, uid }: { onLogout?:()=>void; uid?:strin
   const { artisan, updateArtisan, devis, transactions } = useAppStore();
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({ ...artisan });
+  const [photo, setPhoto] = useState<string|null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const save = async () => {
     const initiales = form.nom.trim().split(" ").map((w:string)=>w[0]).slice(0,2).join("").toUpperCase();
@@ -56,8 +58,16 @@ export function ProfilScreen({ onLogout, uid }: { onLogout?:()=>void; uid?:strin
     setEditing(false);
   };
 
-  const revenus = transactions.filter(t=>t.type==="revenu").reduce((a,t)=>a+t.montant,0);
-  const nbDevis = devis.length;
+  const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setPhoto(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const revenus  = transactions.filter(t=>t.type==="revenu").reduce((a,t)=>a+t.montant,0);
+  const nbDevis  = devis.length;
   const nbAccept = devis.filter(d=>d.statut==="accepte").length;
 
   return (
@@ -74,10 +84,22 @@ export function ProfilScreen({ onLogout, uid }: { onLogout?:()=>void; uid?:strin
       }/>
 
       <div style={{ padding:"14px 12px 0", display:"flex", flexDirection:"column", gap:10 }}>
-        {/* Avatar */}
+        {/* Avatar avec photo */}
         <div style={{ display:"flex", flexDirection:"column", alignItems:"center", paddingBottom:4 }}>
-          <div style={{ width:64, height:64, borderRadius:"50%", background:"linear-gradient(135deg,#DCFCE7,#BBF7D0)", display:"flex", alignItems:"center", justifyContent:"center", fontWeight:800, fontSize:22, color:"#15803D", marginBottom:10, boxShadow:"0 3px 12px rgba(22,163,74,0.2)" }}>
-            {artisan.initiales}
+          <div style={{ position:"relative", marginBottom:10 }}>
+            {photo ? (
+              <img src={photo} alt="Photo profil" style={{ width:72, height:72, borderRadius:"50%", objectFit:"cover", border:"3px solid #BBF7D0" }}/>
+            ) : (
+              <div style={{ width:72, height:72, borderRadius:"50%", background:"linear-gradient(135deg,#DCFCE7,#BBF7D0)", display:"flex", alignItems:"center", justifyContent:"center", fontWeight:800, fontSize:22, color:"#15803D", border:"3px solid #BBF7D0" }}>
+                {artisan.initiales}
+              </div>
+            )}
+            {/* Bouton photo */}
+            <button onClick={()=>fileRef.current?.click()}
+              style={{ position:"absolute", bottom:0, right:0, width:24, height:24, borderRadius:"50%", background:"#16A34A", border:"2px solid #fff", display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer" }}>
+              <Camera size={12} color="#fff"/>
+            </button>
+            <input ref={fileRef} type="file" accept="image/*" onChange={handlePhoto} style={{ display:"none" }}/>
           </div>
           {!editing && (
             <>
@@ -103,13 +125,12 @@ export function ProfilScreen({ onLogout, uid }: { onLogout?:()=>void; uid?:strin
           </div>
         )}
 
-        {/* Formulaire ou infos */}
         {editing ? (
           <div style={{ ...card, padding:14, display:"flex", flexDirection:"column", gap:12 }}>
             {[
-              { label:"Nom complet",    val:form.nom,       set:(v:string)=>setForm({...form,nom:v}),       type:"text" },
-              { label:"Téléphone",      val:form.telephone, set:(v:string)=>setForm({...form,telephone:v}), type:"tel"  },
-              { label:"Ville / Zone",   val:form.ville,     set:(v:string)=>setForm({...form,ville:v}),     type:"text" },
+              { label:"Nom complet",  val:form.nom,       set:(v:string)=>setForm({...form,nom:v}),       type:"text" },
+              { label:"Téléphone",    val:form.telephone, set:(v:string)=>setForm({...form,telephone:v}), type:"tel"  },
+              { label:"Ville / Zone", val:form.ville,     set:(v:string)=>setForm({...form,ville:v}),     type:"text" },
             ].map(({ label, val, set, type })=>(
               <div key={label}>
                 <label style={lbl}>{label}</label>
@@ -128,8 +149,8 @@ export function ProfilScreen({ onLogout, uid }: { onLogout?:()=>void; uid?:strin
             {[
               { Icon:Phone,  label:"Téléphone", value:artisan.telephone },
               { Icon:Wrench, label:"Métier",    value:artisan.metier    },
-              { Icon:MapPin, label:"Zone",       value:artisan.ville     },
-            ].map(({ Icon, label, value }, i)=>(
+              { Icon:MapPin, label:"Zone",      value:artisan.ville     },
+            ].map(({ Icon, label, value },i)=>(
               <div key={label} style={{ display:"flex", alignItems:"center", gap:12, padding:"11px 14px", borderTop:i>0?"1px solid #F8FAFC":"none" }}>
                 <div style={{ width:34, height:34, borderRadius:9, background:"#F0FDF4", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
                   <Icon size={15} style={{ color:"#16A34A" }}/>
@@ -146,7 +167,8 @@ export function ProfilScreen({ onLogout, uid }: { onLogout?:()=>void; uid?:strin
         <AbonnementCard/>
 
         {onLogout && (
-          <button onClick={()=>{ if(confirm("Se déconnecter ?")) onLogout(); }} style={{ width:"100%", padding:"11px", borderRadius:12, background:"#FEF2F2", color:"#DC2626", border:"1.5px solid #FECACA", fontWeight:600, fontSize:13, cursor:"pointer" }}>
+          <button onClick={()=>{ if(confirm("Se déconnecter ?")) onLogout(); }}
+            style={{ width:"100%", padding:"11px", borderRadius:12, background:"#FEF2F2", color:"#DC2626", border:"1.5px solid #FECACA", fontWeight:600, fontSize:13, cursor:"pointer" }}>
             🚪 Se déconnecter
           </button>
         )}
