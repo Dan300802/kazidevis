@@ -7,9 +7,7 @@ export async function exportDevisPDF(
   artisan: { nom: string; metier: string; telephone: string; ville: string }
 ) {
   // Import dynamique jsPDF
-  const jsPDFModule = await import("jspdf");
-  const jsPDF = jsPDFModule.jsPDF || jsPDFModule.default?.jsPDF || jsPDFModule.default;
-  
+  const { jsPDF } = await import("jspdf");
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
   const W = 210; const H = 297; const M = 14; const CW = W - M * 2;
   let y = 0;
