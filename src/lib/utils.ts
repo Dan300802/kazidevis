@@ -59,3 +59,20 @@ export function getMoisNom(key: string): string {
   const [y, m] = key.split("-");
   return new Date(Number(y), Number(m) - 1, 1).toLocaleDateString("fr-FR", { month: "short" });
 }
+
+export const UNITES = [
+  // Quantité générale
+  { groupe: "Général",      items: ["unité","pièce","lot","forfait","article"] },
+  // BTP / Maçonnerie
+  { groupe: "BTP",          items: ["sac","m","m²","m³","kg","tonne","litre","botte","dalle","parpaing"] },
+  // Textile / Couture
+  { groupe: "Couture",      items: ["rouleau","mètre tissu","bobine","paquet","yard"] },
+  // Électricité / Plomberie
+  { groupe: "Électricité",  items: ["ml","tube","gaine","câble","boîte","interrupteur","prise"] },
+  // Commerce / Divers
+  { groupe: "Commerce",     items: ["carton","seau","bidon","bouteille","sachet","boîte","palette","caisse"] },
+  // Temps / Service
+  { groupe: "Temps",        items: ["heure","demi-journée","jour","semaine","mois","prestation"] },
+];
+
+export const TOUTES_UNITES = UNITES.flatMap(g => g.items);

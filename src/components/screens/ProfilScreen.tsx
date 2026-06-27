@@ -24,17 +24,17 @@ function AbonnementCard() {
             <p style={{ fontSize:13, fontWeight:800, color:"#fff" }}>{premium?"Premium actif":"Plan Gratuit"}</p>
           </div>
           <p style={{ fontSize:11, color:"rgba(255,255,255,0.7)" }}>
-            {premium?`Expire le ${abonnement.dateExpiration ? formatDate(abonnement.dateExpiration) : "—"}`:"Export PDF et WhatsApp non disponibles"}
+            {premium ? `Expire le ${abonnement.dateExpiration ? formatDate(abonnement.dateExpiration) : "-"}` : "Export PDF et WhatsApp non disponibles"}
           </p>
         </div>
         <div style={{ background:"#fff", padding:"10px 14px" }}>
           {premium ? (
             <p style={{ fontSize:11, color:"#64748B", display:"flex", alignItems:"center", gap:6 }}>
-              <Star size={12} style={{ color:"#D97706" }}/> Réf : {abonnement.referenceTransaction}
+              <Star size={12} style={{ color:"#D97706" }}/> Ref : {abonnement.referenceTransaction}
             </p>
           ) : (
             <button onClick={()=>setShowModal(true)} style={{ width:"100%", padding:"10px", borderRadius:10, background:"#16A34A", color:"#fff", border:"none", fontWeight:700, fontSize:13, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:6 }}>
-              <Crown size={13}/> Passer Premium — 1 000 FCFA/mois
+              <Crown size={13}/> Passer Premium - 1 000 FCFA/mois
             </button>
           )}
         </div>
@@ -45,11 +45,10 @@ function AbonnementCard() {
 }
 
 export function ProfilScreen({ onLogout, uid }: { onLogout?:()=>void; uid?:string }) {
-  const { artisan, updateArtisan, devis, transactions } = useAppStore();
+  const { artisan, updateArtisan, devis, transactions, setPhotoUrl } = useAppStore();
   const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState({ ...artisan });
-  const [photo, setPhoto] = useState<string|null>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
+  const [form, setForm]       = useState({ ...artisan });
+  const fileRef               = useRef<HTMLInputElement>(null);
 
   const save = async () => {
     const initiales = form.nom.trim().split(" ").map((w:string)=>w[0]).slice(0,2).join("").toUpperCase();
@@ -62,7 +61,10 @@ export function ProfilScreen({ onLogout, uid }: { onLogout?:()=>void; uid?:strin
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => setPhoto(reader.result as string);
+    reader.onload = () => {
+      const url = reader.result as string;
+      setPhotoUrl(url); // Sauvegardé dans le store (persisté dans localStorage)
+    };
     reader.readAsDataURL(file);
   };
 
@@ -84,28 +86,33 @@ export function ProfilScreen({ onLogout, uid }: { onLogout?:()=>void; uid?:strin
       }/>
 
       <div style={{ padding:"14px 12px 0", display:"flex", flexDirection:"column", gap:10 }}>
-        {/* Avatar avec photo */}
+        {/* Avatar avec photo persistée */}
         <div style={{ display:"flex", flexDirection:"column", alignItems:"center", paddingBottom:4 }}>
           <div style={{ position:"relative", marginBottom:10 }}>
-            {photo ? (
-              <img src={photo} alt="Photo profil" style={{ width:72, height:72, borderRadius:"50%", objectFit:"cover", border:"3px solid #BBF7D0" }}/>
+            {artisan.photoUrl ? (
+              <img src={artisan.photoUrl} alt="Photo profil"
+                style={{ width:72, height:72, borderRadius:"50%", objectFit:"cover", border:"3px solid #BBF7D0" }}/>
             ) : (
               <div style={{ width:72, height:72, borderRadius:"50%", background:"linear-gradient(135deg,#DCFCE7,#BBF7D0)", display:"flex", alignItems:"center", justifyContent:"center", fontWeight:800, fontSize:22, color:"#15803D", border:"3px solid #BBF7D0" }}>
                 {artisan.initiales}
               </div>
             )}
-            {/* Bouton photo */}
             <button onClick={()=>fileRef.current?.click()}
-              style={{ position:"absolute", bottom:0, right:0, width:24, height:24, borderRadius:"50%", background:"#16A34A", border:"2px solid #fff", display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer" }}>
-              <Camera size={12} color="#fff"/>
+              style={{ position:"absolute", bottom:0, right:0, width:26, height:26, borderRadius:"50%", background:"#16A34A", border:"2.5px solid #fff", display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer" }}>
+              <Camera size={13} color="#fff"/>
             </button>
-            <input ref={fileRef} type="file" accept="image/*" onChange={handlePhoto} style={{ display:"none" }}/>
+            <input ref={fileRef} type="file" accept="image/*" capture="user" onChange={handlePhoto} style={{ display:"none" }}/>
           </div>
           {!editing && (
             <>
               <p style={{ fontSize:16, fontWeight:800, color:"#0F172A", marginBottom:2 }}>{artisan.nom}</p>
               <p style={{ fontSize:12, color:"#64748B" }}>{artisan.metier} · {artisan.ville}</p>
             </>
+          )}
+          {artisan.photoUrl && (
+            <button onClick={()=>setPhotoUrl("")} style={{ fontSize:10, color:"#DC2626", background:"none", border:"none", cursor:"pointer", marginTop:4 }}>
+              Supprimer la photo
+            </button>
           )}
         </div>
 
@@ -115,11 +122,11 @@ export function ProfilScreen({ onLogout, uid }: { onLogout?:()=>void; uid?:strin
             {[
               { label:"Devis",    value:String(nbDevis)  },
               { label:"Acceptés", value:String(nbAccept) },
-              { label:"Revenus",  value:`${Math.round(revenus/1000)}k` },
+              { label:"Revenus",  value:`${Math.round(revenus/1000)}k FCFA` },
             ].map(({ label, value })=>(
-              <div key={label} style={{ ...card, padding:"10px 8px", textAlign:"center" }}>
-                <p style={{ fontSize:18, fontWeight:800, color:"#0F172A" }}>{value}</p>
-                <p style={{ fontSize:10, color:"#94A3B8" }}>{label}</p>
+              <div key={label} style={{ ...card, padding:"10px 6px", textAlign:"center" }}>
+                <p style={{ fontSize:16, fontWeight:800, color:"#0F172A" }}>{value}</p>
+                <p style={{ fontSize:9, color:"#94A3B8" }}>{label}</p>
               </div>
             ))}
           </div>
@@ -169,7 +176,7 @@ export function ProfilScreen({ onLogout, uid }: { onLogout?:()=>void; uid?:strin
         {onLogout && (
           <button onClick={()=>{ if(confirm("Se déconnecter ?")) onLogout(); }}
             style={{ width:"100%", padding:"11px", borderRadius:12, background:"#FEF2F2", color:"#DC2626", border:"1.5px solid #FECACA", fontWeight:600, fontSize:13, cursor:"pointer" }}>
-            🚪 Se déconnecter
+            Se déconnecter
           </button>
         )}
 

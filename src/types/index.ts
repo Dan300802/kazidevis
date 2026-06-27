@@ -42,6 +42,7 @@ export interface Transaction {
 }
 
 export interface Artisan {
+  photoUrl?: string;
   nom: string;
   metier: string;
   telephone: string;

@@ -18,6 +18,7 @@ interface AppState {
   addTransaction: (t: Transaction) => void;
   deleteTransaction: (id: string) => void;
   updateArtisan: (a: Partial<Artisan>) => void;
+  setPhotoUrl: (url: string) => void;
   addClient: (c: Client) => void;
   updateClient: (c: Client) => void;
   deleteClient: (id: string) => void;
@@ -65,6 +66,7 @@ export const useAppStore = create<AppState>()(
       addTransaction:    (t) => set((s) => ({ transactions: [t, ...s.transactions] })),
       deleteTransaction: (id) => set((s) => ({ transactions: s.transactions.filter((x) => x.id !== id) })),
       updateArtisan: (a) => set((s) => ({ artisan: { ...s.artisan, ...a } })),
+      setPhotoUrl: (url) => set((s) => ({ artisan: { ...s.artisan, photoUrl: url } })),
       addClient:    (c) => set((s) => ({ clients: [c, ...s.clients] })),
       updateClient: (c) => set((s) => ({ clients: s.clients.map((x) => x.id === c.id ? c : x) })),
       deleteClient: (id) => set((s) => ({ clients: s.clients.filter((x) => x.id !== id) })),

@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Plus, Search, FileText, Trash2, Send, ChevronRight, Download, Share2, CreditCard, Check } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
-import { formatMontant, formatDate, totalDevis, METIERS, genId, genNumeroDevis } from "@/lib/utils";
+import { formatMontant, formatDate, totalDevis, METIERS, genId, genNumeroDevis, UNITES } from "@/lib/utils";
 import { exportDevisPDF } from "@/lib/pdf";
 import { partagerDevisWhatsApp, partagerDevisClient } from "@/lib/whatsapp";
 import { PremiumButton } from "@/components/ui/PremiumGate";
@@ -403,9 +403,20 @@ function NouveauDevis({ onBack, onSave, totalDevis: count }: { onBack:()=>void; 
                     <input type="number" min="1" value={l.quantite} onChange={e=>updateLigne(l.id,"quantite",Number(e.target.value))} style={inp}/>
                   </div>
                   <div>
-                    <label style={{ ...lbl, fontSize:10 }}>Prix unitaire</label>
-                    <input type="number" min="0" value={l.prixUnitaire} onChange={e=>updateLigne(l.id,"prixUnitaire",Number(e.target.value))} style={inp}/>
+                    <label style={{ ...lbl, fontSize:10 }}>Unité</label>
+                    <select value={l.unite||""} onChange={e=>updateLigne(l.id,"unite",e.target.value)} style={inp}>
+                      <option value="">-- Unité --</option>
+                      {UNITES.map(g=>(
+                        <optgroup key={g.groupe} label={g.groupe}>
+                          {g.items.map(u=><option key={u} value={u}>{u}</option>)}
+                        </optgroup>
+                      ))}
+                    </select>
                   </div>
+                </div>
+                <div>
+                  <label style={{ ...lbl, fontSize:10 }}>Prix unitaire (FCFA)</label>
+                  <input type="number" min="0" value={l.prixUnitaire} onChange={e=>updateLigne(l.id,"prixUnitaire",Number(e.target.value))} style={inp}/>
                 </div>
                 <p style={{ fontSize:11, fontWeight:700, color:"#16A34A", textAlign:"right", marginTop:6 }}>{formatMontant(l.quantite*l.prixUnitaire)}</p>
               </div>
