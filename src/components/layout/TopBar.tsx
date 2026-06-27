@@ -1,29 +1,19 @@
 "use client";
 import { ArrowLeft } from "lucide-react";
 
-interface TopBarProps {
-  title: string;
-  onBack?: () => void;
-  right?: React.ReactNode;
-}
+interface TopBarProps { title:string; onBack?:()=>void; right?:React.ReactNode; }
 
 export function TopBar({ title, onBack, right }: TopBarProps) {
   return (
-    <header className="sticky top-0 z-30 bg-white border-b border-gray-100">
-      <div className="flex items-center gap-3 px-4 h-14">
+    <header style={{ position:"sticky", top:0, zIndex:30, background:"#fff", borderBottom:"1px solid #F1F5F9" }}>
+      <div style={{ display:"flex", alignItems:"center", gap:10, padding:"0 12px", height:50 }}>
         {onBack && (
-          <button
-            onClick={onBack}
-            aria-label="Retour"
-            className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-gray-100 text-gray-600 transition-colors -ml-1 flex-shrink-0"
-          >
-            <ArrowLeft size={20} />
+          <button onClick={onBack} style={{ width:34, height:34, borderRadius:10, background:"#F1F5F9", border:"none", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+            <ArrowLeft size={17} style={{ color:"#64748B" }}/>
           </button>
         )}
-        <h1 className="flex-1 text-base font-semibold text-gray-900 truncate" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-          {title}
-        </h1>
-        {right && <div className="flex-shrink-0">{right}</div>}
+        <h1 style={{ flex:1, fontSize:15, fontWeight:700, color:"#0F172A", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{title}</h1>
+        {right && <div style={{ flexShrink:0 }}>{right}</div>}
       </div>
     </header>
   );

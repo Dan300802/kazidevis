@@ -1,196 +1,121 @@
 "use client";
 import { TrendingUp, TrendingDown, Plus, ArrowRight } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
-import { formatMontant, formatDate, totalDevis } from "@/lib/utils";
+import { formatMontant, formatDate, totalDevis, STATUT_COLOR, STATUT_LABEL } from "@/lib/utils";
 
 const STATUT_STYLE: Record<string, { bg: string; color: string; label: string }> = {
-  accepte:  { bg: "#F0FDF4", color: "#15803D", label: "Accepté"  },
-  envoye:   { bg: "#F1F5F9", color: "#475569", label: "Envoyé"   },
-  brouillon:{ bg: "#F8FAFC", color: "#94A3B8", label: "Brouillon"},
-  refuse:   { bg: "#FEF2F2", color: "#DC2626", label: "Refusé"   },
+  accepte:   { bg: "#F0FDF4", color: "#15803D", label: "Accepté"   },
+  envoye:    { bg: "#F1F5F9", color: "#475569", label: "Envoyé"    },
+  brouillon: { bg: "#F8FAFC", color: "#94A3B8", label: "Brouillon" },
+  refuse:    { bg: "#FEF2F2", color: "#DC2626", label: "Refusé"    },
 };
 
 export function HomeScreen() {
   const { artisan, devis, transactions, setActiveTab } = useAppStore();
 
-  const revenus  = transactions.filter((t) => t.type === "revenu").reduce((a, t) => a + t.montant, 0);
-  const depenses = transactions.filter((t) => t.type === "depense").reduce((a, t) => a + t.montant, 0);
+  const revenus  = transactions.filter(t => t.type === "revenu").reduce((a,t) => a+t.montant, 0);
+  const depenses = transactions.filter(t => t.type === "depense").reduce((a,t) => a+t.montant, 0);
   const benefice = revenus - depenses;
-  const nbAcceptes = devis.filter((d) => d.statut === "accepte").length;
-  const nbEnvoyes  = devis.filter((d) => d.statut === "envoye").length;
-  const tauxAccept = Math.round((nbAcceptes / Math.max(devis.length, 1)) * 100);
+  const nbAcceptes = devis.filter(d => d.statut === "accepte").length;
+  const nbEnvoyes  = devis.filter(d => d.statut === "envoye").length;
+  const taux = Math.round((nbAcceptes / Math.max(devis.length,1)) * 100);
 
   const mois    = ["Jan","Fév","Mar","Avr","Mai","Jun"];
-  const barData = [38, 52, 44, 68, 60, 100];
-  const maxBar  = Math.max(...barData);
+  const barData = [38,52,44,68,60,100];
+
+  const card: React.CSSProperties = { background:"#fff", borderRadius:12, boxShadow:"0 1px 2px rgba(0,0,0,0.04),0 3px 8px rgba(0,0,0,0.05)" };
 
   return (
-    <div style={{ paddingBottom: 80, background: "#F8FAFC", minHeight: "100%" }}>
-
-      {/* ── Header ── */}
-      <div style={{ background: "#fff", paddingLeft: 20, paddingRight: 20, paddingTop: 20, paddingBottom: 16, borderBottom: "1px solid #F1F5F9" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{
-            width: 40, height: 40, borderRadius: "50%",
-            background: "#DCFCE7", color: "#15803D",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontWeight: 700, fontSize: 14, fontFamily: "'Plus Jakarta Sans', sans-serif",
-            flexShrink: 0,
-          }}>
+    <div style={{ background:"#F8FAFC", minHeight:"100%", paddingBottom:72 }}>
+      {/* Header */}
+      <div style={{ background:"#fff", padding:"14px 14px 12px", borderBottom:"1px solid #F1F5F9" }}>
+        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+          <div style={{ width:36, height:36, borderRadius:"50%", background:"#DCFCE7", display:"flex", alignItems:"center", justifyContent:"center", fontWeight:700, fontSize:13, color:"#15803D", flexShrink:0 }}>
             {artisan.initiales}
           </div>
           <div>
-            <p style={{ fontSize: 12, color: "#94A3B8", marginBottom: 1 }}>Bonjour 👋</p>
-            <h2 style={{ fontSize: 16, fontWeight: 700, color: "#0F172A", fontFamily: "'Plus Jakarta Sans', sans-serif", lineHeight: 1.2 }}>
-              {artisan.nom}
-            </h2>
+            <p style={{ fontSize:11, color:"#94A3B8" }}>Bonjour 👋</p>
+            <p style={{ fontSize:14, fontWeight:700, color:"#0F172A" }}>{artisan.nom}</p>
           </div>
         </div>
       </div>
 
-      <div style={{ padding: "16px 16px 0" }}>
-
-        {/* ── Hero card bénéfice ── */}
-        <div style={{
-          background: "linear-gradient(135deg, #16A34A 0%, #15803D 100%)",
-          borderRadius: 20, padding: "20px 20px 18px",
-          marginBottom: 12,
-          boxShadow: "0 8px 24px rgba(22,163,74,0.28)",
-        }}>
-          <p style={{ fontSize: 11, fontWeight: 600, color: "#86EFAC", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 6 }}>
-            Bénéfice net ce mois
-          </p>
-          <p style={{ fontSize: 34, fontWeight: 800, color: "#fff", fontFamily: "'Plus Jakarta Sans', sans-serif", lineHeight: 1.1, marginBottom: 16 }}>
-            {formatMontant(benefice)}
-          </p>
-          <div style={{ display: "flex", gap: 0, background: "rgba(0,0,0,0.15)", borderRadius: 12, overflow: "hidden" }}>
-            <div style={{ flex: 1, padding: "10px 14px" }}>
-              <p style={{ fontSize: 10, color: "#86EFAC", fontWeight: 600, marginBottom: 3 }}>REVENUS</p>
-              <p style={{ fontSize: 14, fontWeight: 700, color: "#fff", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{formatMontant(revenus)}</p>
+      <div style={{ padding:"12px 12px 0" }}>
+        {/* Hero bénéfice */}
+        <div style={{ background:"linear-gradient(135deg,#16A34A,#15803D)", borderRadius:14, padding:"14px 16px", marginBottom:10, boxShadow:"0 4px 16px rgba(22,163,74,0.25)" }}>
+          <p style={{ fontSize:10, color:"#86EFAC", fontWeight:600, letterSpacing:"0.06em", marginBottom:4 }}>BÉNÉFICE NET CE MOIS</p>
+          <p style={{ fontSize:28, fontWeight:800, color:"#fff", letterSpacing:-0.5, marginBottom:10 }}>{formatMontant(benefice)}</p>
+          <div style={{ display:"flex", gap:0, background:"rgba(0,0,0,0.15)", borderRadius:8, overflow:"hidden" }}>
+            <div style={{ flex:1, padding:"8px 10px" }}>
+              <p style={{ fontSize:9, color:"#86EFAC", fontWeight:600, marginBottom:2 }}>REVENUS</p>
+              <p style={{ fontSize:13, fontWeight:700, color:"#fff" }}>{formatMontant(revenus)}</p>
             </div>
-            <div style={{ width: 1, background: "rgba(255,255,255,0.15)" }} />
-            <div style={{ flex: 1, padding: "10px 14px" }}>
-              <p style={{ fontSize: 10, color: "#86EFAC", fontWeight: 600, marginBottom: 3 }}>DÉPENSES</p>
-              <p style={{ fontSize: 14, fontWeight: 700, color: "#fff", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{formatMontant(depenses)}</p>
+            <div style={{ width:1, background:"rgba(255,255,255,0.15)" }}/>
+            <div style={{ flex:1, padding:"8px 10px" }}>
+              <p style={{ fontSize:9, color:"#86EFAC", fontWeight:600, marginBottom:2 }}>DÉPENSES</p>
+              <p style={{ fontSize:13, fontWeight:700, color:"#fff" }}>{formatMontant(depenses)}</p>
             </div>
           </div>
         </div>
 
-        {/* ── 2 métriques ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 12 }}>
+        {/* Métriques */}
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:10 }}>
           {[
-            { label: "Devis envoyés", value: String(devis.length), sub: `${nbEnvoyes} en attente`, icon: null },
-            { label: "Taux d'acceptation", value: `${tauxAccept}%`, sub: `${nbAcceptes} acceptés`, trend: "up" as const },
-          ].map(({ label, value, sub, trend }) => (
-            <div key={label} style={{
-              background: "#fff", borderRadius: 16, padding: "14px 14px 12px",
-              boxShadow: "0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.06)",
-            }}>
-              <p style={{ fontSize: 11, color: "#94A3B8", fontWeight: 500, marginBottom: 6 }}>{label}</p>
-              <p style={{ fontSize: 24, fontWeight: 700, color: "#0F172A", fontFamily: "'Plus Jakarta Sans', sans-serif", lineHeight: 1 }}>
-                {value}
-              </p>
-              <p style={{ fontSize: 11, color: trend === "up" ? "#16A34A" : "#64748B", marginTop: 5, display: "flex", alignItems: "center", gap: 3 }}>
-                {trend === "up" && <TrendingUp size={10} />}
-                {sub}
+            { label:"Devis envoyés",      value:String(devis.length), sub:`${nbEnvoyes} en attente` },
+            { label:"Taux acceptation",   value:`${taux}%`,           sub:`${nbAcceptes} acceptés`, up:true },
+          ].map(({ label, value, sub, up }) => (
+            <div key={label} style={{ ...card, padding:"12px" }}>
+              <p style={{ fontSize:10, color:"#94A3B8", marginBottom:4 }}>{label}</p>
+              <p style={{ fontSize:20, fontWeight:800, color:"#0F172A", lineHeight:1 }}>{value}</p>
+              <p style={{ fontSize:10, color:up?"#16A34A":"#64748B", marginTop:3, display:"flex", alignItems:"center", gap:3 }}>
+                {up && <TrendingUp size={9}/>}{sub}
               </p>
             </div>
           ))}
         </div>
 
-        {/* ── Graphique ── */}
-        <div style={{
-          background: "#fff", borderRadius: 16, padding: "16px 16px 12px",
-          boxShadow: "0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.06)",
-          marginBottom: 20,
-        }}>
-          <p style={{ fontSize: 11, fontWeight: 700, color: "#94A3B8", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 14 }}>
-            Revenus — 6 mois
-          </p>
-          <div style={{ display: "flex", alignItems: "flex-end", gap: 8, height: 64 }}>
-            {barData.map((h, i) => {
-              const isMax = h === maxBar;
-              const pct   = h / maxBar;
-              return (
-                <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 5, height: "100%", justifyContent: "flex-end" }}>
-                  <div style={{
-                    width: "100%",
-                    height: Math.max(pct * 52, 4),
-                    borderRadius: "4px 4px 2px 2px",
-                    background: isMax ? "#16A34A" : "#D1FAE5",
-                    transition: "height 0.3s ease",
-                  }} />
-                  <span style={{ fontSize: 9, color: "#CBD5E1", fontWeight: 500 }}>{mois[i]}</span>
-                </div>
-              );
-            })}
+        {/* Graphique */}
+        <div style={{ ...card, padding:"12px", marginBottom:10 }}>
+          <p style={{ fontSize:10, fontWeight:700, color:"#94A3B8", letterSpacing:"0.06em", textTransform:"uppercase", marginBottom:10 }}>Revenus — 6 mois</p>
+          <div style={{ display:"flex", alignItems:"flex-end", gap:6, height:56 }}>
+            {barData.map((h,i) => (
+              <div key={i} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:4, height:"100%", justifyContent:"flex-end" }}>
+                <div style={{ width:"100%", height:`${h}%`, borderRadius:"3px 3px 0 0", background:h===100?"#16A34A":"#BBF7D0", minHeight:3 }}/>
+                <span style={{ fontSize:8, color:"#CBD5E1" }}>{mois[i]}</span>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* ── Devis récents ── */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-          <p style={{ fontSize: 11, fontWeight: 700, color: "#94A3B8", letterSpacing: "0.06em", textTransform: "uppercase" }}>
-            Devis récents
-          </p>
-          <button
-            onClick={() => setActiveTab("devis")}
-            style={{ fontSize: 12, fontWeight: 600, color: "#16A34A", display: "flex", alignItems: "center", gap: 3, background: "none", border: "none", cursor: "pointer", padding: "4px 0" }}
-          >
-            Voir tout <ArrowRight size={12} />
+        {/* Devis récents */}
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:8 }}>
+          <p style={{ fontSize:10, fontWeight:700, color:"#94A3B8", textTransform:"uppercase", letterSpacing:"0.06em" }}>Devis récents</p>
+          <button onClick={()=>setActiveTab("devis")} style={{ fontSize:11, fontWeight:600, color:"#16A34A", background:"none", border:"none", cursor:"pointer", display:"flex", alignItems:"center", gap:3 }}>
+            Voir tout <ArrowRight size={11}/>
           </button>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 12 }}>
-          {devis.slice(0, 3).map((d) => {
+        <div style={{ display:"flex", flexDirection:"column", gap:7 }}>
+          {devis.slice(0,3).map(d => {
             const s = STATUT_STYLE[d.statut] ?? STATUT_STYLE.envoye;
             return (
-              <button
-                key={d.id}
-                onClick={() => setActiveTab("devis")}
-                style={{
-                  background: "#fff", borderRadius: 16, padding: "14px 16px",
-                  boxShadow: "0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.06)",
-                  border: "none", cursor: "pointer", textAlign: "left", width: "100%",
-                  display: "block",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, marginBottom: 4 }}>
-                  <span style={{ fontWeight: 600, fontSize: 14, color: "#0F172A", fontFamily: "'Plus Jakarta Sans', sans-serif", flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {d.client}
-                  </span>
-                  <span style={{
-                    fontSize: 11, fontWeight: 600, padding: "3px 9px", borderRadius: 20,
-                    background: s.bg, color: s.color, flexShrink: 0, whiteSpace: "nowrap",
-                  }}>
-                    {s.label}
-                  </span>
+              <button key={d.id} onClick={()=>setActiveTab("devis")}
+                style={{ ...card, padding:"11px 12px", border:"none", cursor:"pointer", textAlign:"left", width:"100%", display:"block" }}>
+                <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:8, marginBottom:3 }}>
+                  <p style={{ fontSize:13, fontWeight:700, color:"#0F172A", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", flex:1 }}>{d.client}</p>
+                  <span style={{ fontSize:10, fontWeight:600, padding:"2px 8px", borderRadius:20, background:s.bg, color:s.color, flexShrink:0 }}>{s.label}</span>
                 </div>
-                <p style={{ fontSize: 11, color: "#94A3B8", marginBottom: 8 }}>
-                  {formatDate(d.dateCreation)} · {d.typeMetier}
-                </p>
-                <p style={{ fontSize: 16, fontWeight: 800, color: "#16A34A", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                  {formatMontant(totalDevis(d.lignes))}
-                </p>
+                <p style={{ fontSize:10, color:"#94A3B8", marginBottom:5 }}>{formatDate(d.dateCreation)} · {d.typeMetier}</p>
+                <p style={{ fontSize:15, fontWeight:800, color:"#16A34A" }}>{formatMontant(totalDevis(d.lignes))}</p>
               </button>
             );
           })}
         </div>
 
-        {/* ── CTA ── */}
-        <button
-          onClick={() => setActiveTab("devis")}
-          style={{
-            width: "100%", padding: "14px 0", borderRadius: 14,
-            border: "1.5px dashed #D1FAE5", background: "#F0FDF4",
-            color: "#16A34A", fontWeight: 600, fontSize: 14,
-            display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-            cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif",
-            marginBottom: 4,
-          }}
-        >
-          <Plus size={16} /> Créer un nouveau devis
+        <button onClick={()=>setActiveTab("devis")}
+          style={{ width:"100%", padding:"11px", borderRadius:12, border:"1.5px dashed #BBF7D0", background:"#F0FDF4", color:"#16A34A", fontWeight:600, fontSize:13, display:"flex", alignItems:"center", justifyContent:"center", gap:6, cursor:"pointer", marginTop:8 }}>
+          <Plus size={14}/> Créer un nouveau devis
         </button>
-
       </div>
     </div>
   );
