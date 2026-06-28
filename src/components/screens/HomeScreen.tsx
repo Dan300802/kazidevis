@@ -62,8 +62,14 @@ export function HomeScreen() {
       <div style={{ background:"#fff", padding:"12px 14px", borderBottom:"1px solid #F1F5F9" }}>
         <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
           <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-            <div style={{ width:36, height:36, borderRadius:"50%", background:"#DCFCE7", display:"flex", alignItems:"center", justifyContent:"center", fontWeight:700, fontSize:13, color:"#15803D", flexShrink:0 }}>
-              {artisan.initiales}
+            <div style={{ width:36, height:36, borderRadius:"50%", overflow:"hidden", flexShrink:0, border:"2px solid #BBF7D0" }}>
+              {artisan.photoUrl ? (
+                <img src={artisan.photoUrl} alt="Photo" style={{ width:"100%", height:"100%", objectFit:"cover" }}/>
+              ) : (
+                <div style={{ width:"100%", height:"100%", background:"#DCFCE7", display:"flex", alignItems:"center", justifyContent:"center", fontWeight:700, fontSize:13, color:"#15803D" }}>
+                  {artisan.initiales}
+                </div>
+              )}
             </div>
             <div>
               <p style={{ fontSize:11, color:"#94A3B8" }}>Bonjour 👋</p>
